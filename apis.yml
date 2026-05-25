@@ -1,0 +1,82 @@
+aid: ethos-life
+name: Ethos
+description: >-
+  Ethos is a US digital life insurance company headquartered in San Francisco,
+  founded in 2016, offering term life, whole life, and indexed universal life
+  policies through an online, mostly no-medical-exam application flow. Ethos
+  operates as a technology-driven insurance agency, distributing policies
+  underwritten by carriers such as Ameritas, Banner Life (Legal & General
+  America), Protective, and TruStage. Coverage is available in 49 states and
+  Washington, D.C., with term policies offered for 10, 15, 20, 30, and 40
+  year durations and face amounts ranging from $15,000 to $3 million. The
+  company has raised over $400 million from investors including Goldman
+  Sachs, SoftBank, GV, Sequoia, and Accel, and is widely cited as one of
+  the leading insurtech companies modernizing the life insurance buying
+  experience. Ethos exposes a Partnership API that lets approved business
+  partners embed quoting, identity validation, instant underwriting,
+  application capture, billing, and signed policy issuance directly into
+  their own products. The Partnership API uses bearer-token authentication
+  tied to a partner API key and per-applicant session, and consolidates
+  steps such as identity validation and quoting into combined endpoints to
+  enable instant decisioning. There is no public, self-serve OpenAPI
+  specification, SDK, or developer signup; access requires a partnership
+  agreement with Ethos. Ethos's only material open-source footprint is the
+  ethos-design-system React component library on GitHub.
+type: Index
+position: Provider
+access: 3rd-Party
+image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+tags:
+  - Insurance
+  - Life Insurance
+  - Term Life Insurance
+  - Whole Life Insurance
+  - Indexed Universal Life
+  - Insurtech
+  - Digital Insurance
+  - No Medical Exam
+  - Underwriting
+  - Quotes
+  - Policies
+  - Embedded Insurance
+  - Partnership API
+  - Financial Services
+url: https://raw.githubusercontent.com/api-evangelist/ethos-life/refs/heads/main/apis.yml
+created: '2026-05-25'
+modified: '2026-05-25'
+specificationVersion: '0.20'
+apis: []
+common:
+  - type: Website
+    url: https://www.ethos.com
+  - type: API
+    url: https://www.ethos.com/api/
+  - type: Partners
+    url: https://www.ethos.com/faq/partners/
+  - type: PolicyholderResources
+    url: https://www.ethos.com/policyholder-resource-page-partnerships/
+  - type: AgentPortal
+    url: https://agents.ethoslife.com/login
+  - type: CustomerApplication
+    url: https://app.ethoslife.com/login/
+  - type: TechBlog
+    url: https://www.ethos.com/tech-and-ethos/
+  - type: MediumEngineering
+    url: https://techandethos.medium.com
+  - type: About
+    url: https://www.ethos.com/about/
+  - type: Careers
+    url: https://www.ethoslife.com/careers/
+  - type: GitHub
+    url: https://github.com/getethos
+  - type: DesignSystem
+    url: https://github.com/getethos/ethos-design-system
+  - type: LinkedIn
+    url: https://www.linkedin.com/company/ethoslife
+  - type: Twitter
+    url: https://twitter.com/ethoslife
+  - type: Crunchbase
+    url: https://www.crunchbase.com/organization/ethos-3
+maintainers:
+  - FN: Kin Lane
+    email: kin@apievangelist.com

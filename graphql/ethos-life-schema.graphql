@@ -1,0 +1,911 @@
+"""
+Ethos Life Partnership API - Conceptual GraphQL Schema
+Derived from public documentation at https://partners.ethoslife.com/api/
+This schema represents the domain model for Ethos Life's embedded insurance platform.
+"""
+
+# ─── Scalar Types ────────────────────────────────────────────────────────────
+
+scalar Date
+scalar DateTime
+scalar Decimal
+scalar JSON
+
+# ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum ApplicationStatusValue {
+  DRAFT
+  SUBMITTED
+  IN_REVIEW
+  APPROVED
+  DECLINED
+  CANCELLED
+  EXPIRED
+}
+
+enum PolicyStatusValue {
+  PENDING_ISSUE
+  ACTIVE
+  LAPSED
+  CANCELLED
+  MATURED
+  PAID_UP
+}
+
+enum ClaimStatusValue {
+  SUBMITTED
+  IN_REVIEW
+  APPROVED
+  DENIED
+  PAID
+  WITHDRAWN
+}
+
+enum BeneficiaryTypeValue {
+  PRIMARY
+  CONTINGENT
+  TERTIARY
+}
+
+enum BeneficiaryRelationship {
+  SPOUSE
+  CHILD
+  PARENT
+  SIBLING
+  OTHER_RELATIVE
+  TRUST
+  ESTATE
+  CHARITY
+  BUSINESS_PARTNER
+  OTHER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  NON_BINARY
+}
+
+enum TobaccoStatus {
+  NEVER
+  FORMER
+  CURRENT
+}
+
+enum UnderwritingDecisionValue {
+  APPROVED_AS_APPLIED
+  APPROVED_WITH_MODIFICATION
+  RATED
+  DECLINED
+  POSTPONED
+  PENDING_MEDICAL_INFO
+  INSTANT_DECISION
+}
+
+enum WebhookEventType {
+  APPLICATION_SUBMITTED
+  APPLICATION_APPROVED
+  APPLICATION_DECLINED
+  POLICY_ISSUED
+  POLICY_CANCELLED
+  POLICY_LAPSED
+  PAYMENT_RECEIVED
+  PAYMENT_FAILED
+  CLAIM_SUBMITTED
+  CLAIM_DECISION
+  QUOTE_CREATED
+  OFFER_GENERATED
+}
+
+enum PaymentFrequency {
+  MONTHLY
+  QUARTERLY
+  SEMI_ANNUAL
+  ANNUAL
+}
+
+enum PaymentMethod {
+  ACH
+  CREDIT_CARD
+  CHECK
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSED
+  FAILED
+  REFUNDED
+}
+
+enum HealthQuestionCategory {
+  GENERAL_HEALTH
+  CARDIOVASCULAR
+  RESPIRATORY
+  CANCER
+  MENTAL_HEALTH
+  SUBSTANCE_USE
+  FAMILY_HISTORY
+  LIFESTYLE
+  MEDICATIONS
+}
+
+enum CoverageType {
+  TERM_LIFE
+  WHOLE_LIFE
+  INDEXED_UNIVERSAL_LIFE
+  ACCIDENTAL_DEATH
+}
+
+# ─── Core Application Types ───────────────────────────────────────────────────
+
+"""Represents a life insurance application submitted through the Ethos platform."""
+type Application {
+  id: ID!
+  status: ApplicationStatus!
+  details: ApplicationDetails!
+  applicant: Applicant!
+  quote: Quote
+  offer: Offer
+  policy: Policy
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  submittedAt: DateTime
+  partner: PartnerDetails
+  agentId: ID
+  metadata: JSON
+}
+
+"""Current status of an application."""
+type ApplicationStatus {
+  value: ApplicationStatusValue!
+  reason: String
+  updatedAt: DateTime!
+  history: [ApplicationStatusHistory!]!
+}
+
+"""Historical record of application status changes."""
+type ApplicationStatusHistory {
+  value: ApplicationStatusValue!
+  reason: String
+  changedAt: DateTime!
+  changedBy: String
+}
+
+"""Detailed information captured during the application process."""
+type ApplicationDetails {
+  applicationId: ID!
+  formVersion: String
+  channel: String
+  source: String
+  referralCode: String
+  ipAddress: String
+  userAgent: String
+  consentGiven: Boolean!
+  consentTimestamp: DateTime
+  electronicSignature: String
+  signedAt: DateTime
+  documents: [PolicyDocument!]!
+}
+
+# ─── Quote Types ──────────────────────────────────────────────────────────────
+
+"""A life insurance quote generated for an applicant."""
+type Quote {
+  id: ID!
+  applicantId: ID!
+  details: QuoteDetails!
+  terms: [QuoteTerms!]!
+  premium: PremiumDetails!
+  coverage: Coverage!
+  createdAt: DateTime!
+  expiresAt: DateTime!
+  isInstant: Boolean!
+  riskAssessment: RiskAssessment
+}
+
+"""Core details associated with a quote."""
+type QuoteDetails {
+  quoteId: ID!
+  productName: String!
+  carrier: String!
+  state: String!
+  currency: String!
+  healthClass: String
+  tableRating: String
+  flatExtra: Decimal
+  permanentFlatExtra: Decimal
+  requiresMedicalExam: Boolean!
+  noExamEligible: Boolean!
+}
+
+"""Terms and duration options for a quote."""
+type QuoteTerms {
+  termLength: TermLength!
+  coverageAmount: CoverageAmount!
+  monthlyPremium: Decimal!
+  annualPremium: Decimal!
+  availableRiders: [RiderDetails!]!
+}
+
+# ─── Policy Types ─────────────────────────────────────────────────────────────
+
+"""An issued life insurance policy."""
+type Policy {
+  id: ID!
+  policyNumber: String!
+  status: PolicyStatus!
+  details: PolicyDetails!
+  coverage: Coverage!
+  premium: Premium!
+  applicant: Applicant!
+  beneficiaries: [Beneficiary!]!
+  riders: [RiderDetails!]!
+  documents: [PolicyDocument!]!
+  issueDate: Date
+  effectiveDate: Date
+  expirationDate: Date
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""Current status of a policy."""
+type PolicyStatus {
+  value: PolicyStatusValue!
+  reason: String
+  updatedAt: DateTime!
+  lapseDate: Date
+  graceperiodEnd: Date
+}
+
+"""Core policy details including carrier and product info."""
+type PolicyDetails {
+  policyId: ID!
+  policyNumber: String!
+  carrier: String!
+  productName: String!
+  productType: CoverageType!
+  state: String!
+  faceAmount: Decimal!
+  healthClass: String!
+  tableRating: String
+  isTrust: Boolean!
+}
+
+# ─── Coverage Types ───────────────────────────────────────────────────────────
+
+"""Coverage details for a policy or quote."""
+type Coverage {
+  type: CoverageType!
+  amount: CoverageAmount!
+  term: Term
+  deathBenefit: DeathBenefit!
+  accidentalDeathBenefit: AccidentalDeathBenefit
+}
+
+"""The monetary amount of coverage."""
+type CoverageAmount {
+  value: Decimal!
+  currency: String!
+  minimum: Decimal!
+  maximum: Decimal!
+}
+
+"""Policy term information."""
+type Term {
+  length: TermLength!
+  startDate: Date
+  endDate: Date
+  renewalOptions: [TermLength!]!
+}
+
+"""Duration of a policy term."""
+type TermLength {
+  years: Int!
+  months: Int
+  label: String!
+}
+
+# ─── Premium Types ────────────────────────────────────────────────────────────
+
+"""Summary premium information."""
+type Premium {
+  monthly: Decimal!
+  annual: Decimal!
+  frequency: PaymentFrequency!
+  nextDueDate: Date
+  lastPaidDate: Date
+}
+
+"""Detailed premium breakdown."""
+type PremiumDetails {
+  basePremium: Decimal!
+  riderPremium: Decimal!
+  totalMonthly: Decimal!
+  totalAnnual: Decimal!
+  modalFactor: Decimal!
+  paymentFrequency: PaymentFrequency!
+  paymentMethod: PaymentMethod
+  gracePeriodDays: Int!
+}
+
+# ─── Beneficiary Types ────────────────────────────────────────────────────────
+
+"""A named beneficiary on a life insurance policy."""
+type Beneficiary {
+  id: ID!
+  type: BeneficiaryType!
+  details: BeneficiaryDetails!
+  allocationPercent: Decimal!
+}
+
+"""Classification of a beneficiary (primary, contingent, etc.)."""
+type BeneficiaryType {
+  value: BeneficiaryTypeValue!
+  label: String!
+}
+
+"""Personal details of a beneficiary."""
+type BeneficiaryDetails {
+  firstName: String!
+  lastName: String!
+  middleName: String
+  suffix: String
+  relationship: BeneficiaryRelationship!
+  dateOfBirth: DateOfBirth
+  ssn: String
+  trustName: String
+  trustDate: Date
+  charityName: String
+  charityEin: String
+  phone: String
+  email: String
+  address: Address
+}
+
+# ─── Applicant Types ──────────────────────────────────────────────────────────
+
+"""An individual applying for life insurance through Ethos."""
+type Applicant {
+  id: ID!
+  details: ApplicantDetails!
+  demographics: ApplicantDemographics!
+  healthAnswers: [HealthAnswer!]!
+  riskAssessment: RiskAssessment
+  identityVerified: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""Core identifying details for an applicant."""
+type ApplicantDetails {
+  firstName: String!
+  lastName: String!
+  middleName: String
+  suffix: String
+  email: String!
+  phone: String!
+  ssn: String
+  address: Address!
+  driverLicenseNumber: String
+  driverLicenseState: String
+}
+
+"""Demographic and health-related data for underwriting."""
+type ApplicantDemographics {
+  dateOfBirth: DateOfBirth!
+  age: Int!
+  gender: Gender!
+  height: Height!
+  weight: Weight!
+  tobaccoStatus: TobaccoStatus!
+  lastTobaccoUseDate: Date
+  stateOfResidence: String!
+  citizenship: String
+  annualIncome: Decimal
+  netWorth: Decimal
+  occupation: String
+}
+
+"""Structured date of birth."""
+type DateOfBirth {
+  day: Int!
+  month: Int!
+  year: Int!
+  isoDate: Date!
+}
+
+"""Height measurement."""
+type Height {
+  feet: Int!
+  inches: Int!
+  centimeters: Decimal
+}
+
+"""Weight measurement."""
+type Weight {
+  pounds: Decimal!
+  kilograms: Decimal
+}
+
+# ─── Health & Underwriting Types ──────────────────────────────────────────────
+
+"""A health question presented during the application process."""
+type HealthQuestion {
+  id: ID!
+  questionText: String!
+  category: HealthQuestionCategory!
+  isRequired: Boolean!
+  followUpQuestions: [HealthQuestion!]!
+  order: Int!
+}
+
+"""An applicant's answer to a health question."""
+type HealthAnswer {
+  questionId: ID!
+  question: HealthQuestion!
+  answer: Boolean!
+  details: String
+  answeredAt: DateTime!
+}
+
+"""Risk profile computed from applicant data."""
+type RiskAssessment {
+  riskScore: Decimal
+  riskClass: String!
+  factors: [RiskFactor!]!
+  computedAt: DateTime!
+  requiresMedicalExam: Boolean!
+  requiresAPS: Boolean!
+}
+
+"""Individual factor contributing to risk assessment."""
+type RiskFactor {
+  name: String!
+  impact: String!
+  description: String
+}
+
+"""Underwriting decision for an application."""
+type UnderwritingDecision {
+  id: ID!
+  applicationId: ID!
+  decision: UnderwritingDecisionValue!
+  healthClass: String
+  tableRating: String
+  flatExtra: Decimal
+  exclusions: [String!]!
+  declineReasons: [String!]!
+  decidedAt: DateTime!
+  expiresAt: DateTime
+  notes: String
+}
+
+# ─── Offer Types ──────────────────────────────────────────────────────────────
+
+"""An insurance offer presented to an applicant after underwriting."""
+type Offer {
+  id: ID!
+  applicationId: ID!
+  details: OfferDetails!
+  expiry: OfferExpiry!
+  quote: Quote!
+  underwritingDecision: UnderwritingDecision!
+  isAccepted: Boolean
+  acceptedAt: DateTime
+}
+
+"""Details of an insurance offer."""
+type OfferDetails {
+  offerId: ID!
+  carrier: String!
+  productName: String!
+  coverageAmount: CoverageAmount!
+  termLength: TermLength
+  monthlyPremium: Decimal!
+  annualPremium: Decimal!
+  healthClass: String!
+  riders: [RiderDetails!]!
+}
+
+"""Expiry information for an offer."""
+type OfferExpiry {
+  expiresAt: DateTime!
+  isExpired: Boolean!
+  daysRemaining: Int
+}
+
+# ─── Document Types ───────────────────────────────────────────────────────────
+
+"""A document associated with a policy or application."""
+type PolicyDocument {
+  id: ID!
+  type: String!
+  name: String!
+  url: String
+  mimeType: String!
+  sizeBytes: Int
+  signedAt: DateTime
+  createdAt: DateTime!
+}
+
+# ─── Benefit & Rider Types ────────────────────────────────────────────────────
+
+"""Accidental death benefit rider details."""
+type AccidentalDeathBenefit {
+  isIncluded: Boolean!
+  amount: Decimal
+  premium: Decimal
+  description: String
+}
+
+"""The core death benefit of a policy."""
+type DeathBenefit {
+  faceAmount: Decimal!
+  accumulatedValue: Decimal
+  netAmountAtRisk: Decimal
+  grading: String
+}
+
+"""Details of a policy rider."""
+type RiderDetails {
+  id: ID!
+  name: String!
+  code: String!
+  description: String!
+  premium: Decimal!
+  isIncluded: Boolean!
+  coverageAmount: Decimal
+  termLength: TermLength
+}
+
+# ─── Claims Types ─────────────────────────────────────────────────────────────
+
+"""A life insurance claim filed against a policy."""
+type Claim {
+  id: ID!
+  policyId: ID!
+  policy: Policy!
+  status: ClaimStatus!
+  details: ClaimDetails!
+  payments: [Payment!]!
+  submittedAt: DateTime!
+  decidedAt: DateTime
+  updatedAt: DateTime!
+}
+
+"""Detailed information about a claim."""
+type ClaimDetails {
+  claimId: ID!
+  claimType: String!
+  insuredName: String!
+  dateOfDeath: Date
+  causeOfDeath: String
+  claimantName: String!
+  claimantRelationship: String!
+  claimantPhone: String!
+  claimantEmail: String!
+  documents: [PolicyDocument!]!
+  notes: String
+}
+
+"""Current status of a claim."""
+type ClaimStatus {
+  value: ClaimStatusValue!
+  reason: String
+  updatedAt: DateTime!
+}
+
+# ─── Payment Types ────────────────────────────────────────────────────────────
+
+"""A payment record associated with a policy or claim."""
+type Payment {
+  id: ID!
+  policyId: ID
+  claimId: ID
+  amount: Decimal!
+  currency: String!
+  status: PaymentStatus!
+  method: PaymentMethod!
+  frequency: PaymentFrequency
+  processedAt: DateTime
+  failureReason: String
+  referenceNumber: String
+  createdAt: DateTime!
+}
+
+# ─── Agent & Agency Types ─────────────────────────────────────────────────────
+
+"""A licensed insurance agent distributing Ethos products."""
+type Agent {
+  id: ID!
+  details: AgentDetails!
+  agency: Agency
+  isActive: Boolean!
+  licenseStates: [String!]!
+  createdAt: DateTime!
+}
+
+"""Details of an insurance agent."""
+type AgentDetails {
+  agentId: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String!
+  npn: String!
+  licenseNumber: String
+}
+
+"""An insurance agency that employs or contracts agents."""
+type Agency {
+  id: ID!
+  details: AgencyDetails!
+  agents: [Agent!]!
+  isActive: Boolean!
+}
+
+"""Details of an insurance agency."""
+type AgencyDetails {
+  agencyId: ID!
+  name: String!
+  npn: String!
+  email: String!
+  phone: String!
+  address: Address!
+}
+
+# ─── Integration & Partner Types ──────────────────────────────────────────────
+
+"""Represents an active API integration with the Ethos platform."""
+type Integration {
+  id: ID!
+  partner: PartnerDetails!
+  apiKey: APIKey!
+  webhooks: [Webhook!]!
+  isActive: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""Details of a business partner using the Ethos Partnership API."""
+type PartnerDetails {
+  partnerId: ID!
+  name: String!
+  contactEmail: String!
+  website: String
+  partnerType: String!
+  agreementDate: Date
+  allowedStates: [String!]!
+}
+
+"""An API key used for partner authentication."""
+type APIKey {
+  id: ID!
+  keyPrefix: String!
+  name: String!
+  scopes: [String!]!
+  isActive: Boolean!
+  createdAt: DateTime!
+  expiresAt: DateTime
+  lastUsedAt: DateTime
+}
+
+"""A session token for per-applicant API access."""
+type Token {
+  accessToken: String!
+  tokenType: String!
+  expiresIn: Int!
+  expiresAt: DateTime!
+  scope: String!
+  applicantId: ID
+}
+
+# ─── Webhook Types ────────────────────────────────────────────────────────────
+
+"""A webhook endpoint registered by a partner."""
+type Webhook {
+  id: ID!
+  url: String!
+  events: [WebhookEventType!]!
+  isActive: Boolean!
+  secret: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  lastDeliveryAt: DateTime
+  lastDeliveryStatus: String
+}
+
+"""An event payload delivered to a webhook endpoint."""
+type WebhookEvent {
+  id: ID!
+  webhookId: ID!
+  eventType: WebhookEventType!
+  payload: JSON!
+  deliveredAt: DateTime
+  responseCode: Int
+  retryCount: Int!
+  succeeded: Boolean!
+  createdAt: DateTime!
+}
+
+# ─── Shared / Utility Types ───────────────────────────────────────────────────
+
+"""A mailing or service address."""
+type Address {
+  line1: String!
+  line2: String
+  city: String!
+  state: String!
+  zip: String!
+  country: String!
+}
+
+# ─── Root Operations ──────────────────────────────────────────────────────────
+
+type Query {
+  """Retrieve a single application by ID."""
+  application(id: ID!): Application
+
+  """List all applications for the authenticated partner."""
+  applications(
+    status: ApplicationStatusValue
+    limit: Int
+    offset: Int
+  ): [Application!]!
+
+  """Retrieve a quote by ID."""
+  quote(id: ID!): Quote
+
+  """Retrieve a policy by ID."""
+  policy(id: ID!): Policy
+
+  """List policies for the authenticated partner."""
+  policies(
+    status: PolicyStatusValue
+    limit: Int
+    offset: Int
+  ): [Policy!]!
+
+  """Retrieve an applicant by ID."""
+  applicant(id: ID!): Applicant
+
+  """Retrieve an offer by ID."""
+  offer(id: ID!): Offer
+
+  """Retrieve a claim by ID."""
+  claim(id: ID!): Claim
+
+  """List health questions for a given product."""
+  healthQuestions(productType: CoverageType!): [HealthQuestion!]!
+
+  """Retrieve agent information."""
+  agent(id: ID!): Agent
+
+  """Retrieve agency information."""
+  agency(id: ID!): Agency
+
+  """List webhooks registered for the authenticated partner."""
+  webhooks: [Webhook!]!
+
+  """Retrieve webhook event delivery history."""
+  webhookEvents(webhookId: ID!, limit: Int): [WebhookEvent!]!
+
+  """Retrieve integration details for the authenticated partner."""
+  integration: Integration
+}
+
+type Mutation {
+  """Create a new insurance application."""
+  createApplication(
+    applicantId: ID!
+    quoteId: ID!
+    agentId: ID
+  ): Application!
+
+  """Submit a completed application for underwriting."""
+  submitApplication(id: ID!): Application!
+
+  """Cancel a pending application."""
+  cancelApplication(id: ID!, reason: String): Application!
+
+  """Generate a new quote for an applicant."""
+  createQuote(
+    applicantId: ID!
+    coverageAmount: Decimal!
+    termYears: Int
+    productType: CoverageType!
+    state: String!
+  ): Quote!
+
+  """Create or update an applicant profile."""
+  upsertApplicant(
+    email: String!
+    firstName: String!
+    lastName: String!
+    dateOfBirth: Date!
+    state: String!
+  ): Applicant!
+
+  """Submit health answers for an applicant."""
+  submitHealthAnswers(
+    applicantId: ID!
+    answers: [HealthAnswerInput!]!
+  ): Applicant!
+
+  """Accept an underwriting offer."""
+  acceptOffer(offerId: ID!): Offer!
+
+  """Add a beneficiary to a policy."""
+  addBeneficiary(
+    policyId: ID!
+    type: BeneficiaryTypeValue!
+    allocationPercent: Decimal!
+    details: BeneficiaryInput!
+  ): Beneficiary!
+
+  """Update beneficiaries on a policy."""
+  updateBeneficiaries(
+    policyId: ID!
+    beneficiaries: [BeneficiaryUpdateInput!]!
+  ): [Beneficiary!]!
+
+  """Submit a claim against a policy."""
+  submitClaim(
+    policyId: ID!
+    details: ClaimInput!
+  ): Claim!
+
+  """Register a new webhook endpoint."""
+  createWebhook(
+    url: String!
+    events: [WebhookEventType!]!
+    secret: String
+  ): Webhook!
+
+  """Update an existing webhook."""
+  updateWebhook(
+    id: ID!
+    url: String
+    events: [WebhookEventType!]
+    isActive: Boolean
+  ): Webhook!
+
+  """Delete a webhook."""
+  deleteWebhook(id: ID!): Boolean!
+
+  """Generate a per-applicant session token."""
+  createToken(applicantId: ID!): Token!
+}
+
+# ─── Input Types ──────────────────────────────────────────────────────────────
+
+input HealthAnswerInput {
+  questionId: ID!
+  answer: Boolean!
+  details: String
+}
+
+input BeneficiaryInput {
+  firstName: String!
+  lastName: String!
+  relationship: BeneficiaryRelationship!
+  dateOfBirth: Date
+  ssn: String
+}
+
+input BeneficiaryUpdateInput {
+  id: ID
+  type: BeneficiaryTypeValue!
+  allocationPercent: Decimal!
+  details: BeneficiaryInput!
+}
+
+input ClaimInput {
+  claimType: String!
+  dateOfDeath: Date
+  causeOfDeath: String
+  claimantName: String!
+  claimantRelationship: String!
+  claimantPhone: String!
+  claimantEmail: String!
+}

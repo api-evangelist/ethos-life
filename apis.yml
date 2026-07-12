@@ -44,6 +44,8 @@ modified: '2026-05-25'
 specificationVersion: '0.20'
 apis: []
 common:
+- type: DomainSecurity
+  url: security/ethos-life-domain-security.yml
 - type: Website
   url: https://www.ethos.com
 - type: API
@@ -76,6 +78,8 @@ common:
   url: https://www.crunchbase.com/organization/ethos-3
 - url: graphql/ethos-life-graphql.md
   type: GraphQL
+- type: Blog
+  url: https://techandethos.medium.com/feed
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com

@@ -1,0 +1,13 @@
+{
+  "repo": "ethos-life",
+  "feeds": [
+    {
+      "source": "https://techandethos.medium.com",
+      "feed_url": "https://techandethos.medium.com/feed",
+      "title": "Stories by Ethos Life on Medium",
+      "saved": 0
+    }
+  ],
+  "fetched": "2026-07-11T11:43:46Z",
+  "post_count": 10
+}

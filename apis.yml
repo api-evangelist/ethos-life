@@ -20,9 +20,20 @@ description: Ethos is a US digital life insurance company headquartered in San F
   only material open-source footprint is the ethos-design-system React component library
   on GitHub.
 type: Index
+accessModel:
+  pricing: unknown
+  onboarding: unknown
+  trial: false
+  try_now: false
+  public: false
+  label: Unknown
+  confidence: low
+  source: []
+  generated: '2026-07-22'
+  method: derived
 position: Provider
 access: 3rd-Party
-image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/ethos-life.png
 tags:
 - Insurance
 - Life Insurance

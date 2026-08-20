@@ -48,6 +48,21 @@ tags:
 - Policies
 - Embedded Insurance
 - Partnership API
+- Financial-Services
+tags_raw:
+- Insurance
+- Life Insurance
+- Term Life Insurance
+- Whole Life Insurance
+- Indexed Universal Life
+- Insurtech
+- Digital Insurance
+- No Medical Exam
+- Underwriting
+- Quotes
+- Policies
+- Embedded Insurance
+- Partnership API
 - Financial Services
 url: https://raw.githubusercontent.com/api-evangelist/ethos-life/refs/heads/main/apis.yml
 created: '2026-05-25'

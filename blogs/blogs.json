@@ -5,9 +5,14 @@
       "source": "https://techandethos.medium.com",
       "feed_url": "https://techandethos.medium.com/feed",
       "title": "Stories by Ethos Life on Medium",
-      "saved": 0
+      "saved": 0,
+      "nature": "undetermined",
+      "nature_basis": null
     }
   ],
   "fetched": "2026-08-30T22:05:13Z",
-  "post_count": 11
+  "post_count": 11,
+  "feed_nature": "undetermined",
+  "feed_nature_basis": null,
+  "feed_nature_note": "Whether these posts are the vendor publishing or its support community, decided on the URL path grammar of the saved posts -- not the hostname, which carries both on Khoros, and not author diversity, which flags large vendor blogs as forums. 'undetermined' means undetermined."
 }
